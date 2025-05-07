@@ -81,7 +81,7 @@ float bmeTempf = 0;     // sensor value
 float bmeHum = 0;       // sensor value
 float bmePress = 0;     // sensor value
 float bmeVoc = 0;       // sensor value
-float version = 0.4;   // version number
+float version = 0.4;    // version number
 
 int pm10 = 0;                       // sensor value
 int pm25 = 0;                       // sensor value
@@ -89,7 +89,7 @@ int pm100 = 0;                      // sensor value
 int resetDelay = 10000;             // über Webinterface anpassbar dispaly timeout USER
 int calibrationInterval = 3600000;  // Touchcalibrationintervall in ms (3600000 = 3 Stunden)
 int printInterval = 5000;
-int mInterval = 10;                 // Sensor interval PMS 7003 USER
+int mInterval = 10;                 // Sensor interval PMS SCD30 in sec
 int BmeInterval = 10000;            // Sensor Interval BME 680
 int contrast = 1;                   // Display brightness USER
 int touchSense = 100;               // set the touch sensitivity. Less is more sensitiv
@@ -97,7 +97,7 @@ int touchTreshhold = 500000;        // Treshhold Touchpin (autocalibrate)
 int co2Limit = 1500;                // Co2 Limit zum anzeigen eines "!" beim überschreiten USER
 int wsLiveInterval = 1000;          // every seconds send JSON via Websocket
 int PMSInterval = 90000;            // the interval of PMS Sleep
-int chartInterval = 1000;           // the interval for sending new data to the webchart (1800000 ms = 30 min)
+int chartInterval = 100000;         // the interval for sending new data to the webchart (1800000 ms = 30 min)
 int uptime = 0;                     // uptime in min
 int screenRoataion = 3;             // set screen rotation 0 - 4
 
@@ -477,6 +477,7 @@ void LiveDataToJson() {
         jsonDocData["pm100"] = pm100;
         jsonDocData["uptime"] = uptime;
         jsonDocData["tempUnit"] = tempUnit;
+        jsonDocData["name"] = name;
         jsonDocData["WlanIP"] = String(staIP);
         jsonDocData["Version"] = String(version);
         //jsonDoc["mesaurementNames"] = mesaurementNames[1];

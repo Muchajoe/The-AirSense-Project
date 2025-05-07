@@ -1,20 +1,20 @@
 # The AirSense Project
 Aaalright! This is my Final project for Harvards CS50. It is a "low budget" airquality sensor with (i think) high quality components. I use the Arduino IDE for programming. That means the main programm runs in C++. In my opinion that is very smiliar to the courses C programming language. With around 70$ (but i think if you do a bit research you can do it cheaper) you will get the following measurements.
-Temperatur (scd30)
-Temperatur (BME680)
-Humidity (BME680)
-Humidity (SCD30)
-CO2 (SCD30)
-PM1 (PMS7003)
-PM2.5 (PMS7003)
-PM10 (PMS7003)
-Pressure (BME680),
-VOC (BME680)
+- Temperatur (scd30)
+- Temperatur (BME680)
+- Humidity (BME680)
+- Humidity (SCD30)
+- CO2 (SCD30)
+- PM1 (PMS7003)
+- PM2.5 (PMS7003)
+- PM10 (PMS7003)
+- Pressure (BME680),
+- VOC (BME680)
 
 If you touch the sensor Pin the values will shown to you on the small 1.5" Oled screen for 30 sec (default). And you can see the values via a Webinterface by connecting direct to the AirSense Wlan (see Webinterface). It should be ok to use a 5V 1A USB power suply
 
 #### Video Demo:
-<URL https://youtu.be/_k8XbBeKSHA>
+https://youtu.be/_k8XbBeKSHA
 
 # Components
 What we need? I think you can get these compononts a bit cheaper than my estimated prices.
@@ -39,10 +39,10 @@ how to wire the components to the ESP32. The BME680 Sensor, the OLED Screen and 
 |19	 	            |TX PMS7003                       |
 |20		 	        |RX PMS7003                       |
 |1  			 	|TOUCH_PIN(for the touch detection) |
-|21			 	    |OLED_SDA                           |
-|47         	 	|OLED_SCL |
+|47			 	    |OLED_SDA                           |
+|21         	 	|OLED_SCL |
 |4	                |Sensor SDA (BME680 and SCD30)|
-|5               	|Sensor SDL (BME680 and SCD30)|
+|5               	|Sensor SCL (BME680 and SCD30)|
 | 				|			   |
 
 IMPORTANT dont forget that the PMS7003 sensor needs 5v for the fan! The other components can be powered with the onboard 3.3V pins. The Sensors SDA and SDL should be wired to both sensors BME680 and SCD30 (paralel). The power consumption is estimated about 750mA so i would recommend a at least 1A USB Plug.

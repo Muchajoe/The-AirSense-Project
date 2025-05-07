@@ -101,62 +101,76 @@
                             </tr>
                             <tr>
                               <th scope="row">3</th>
-                              <td>Measurements Interval</td>
+                              <td>Screen Orientation</td>
                               <td>
-                                <select class="form-select form-select-sm" aria-label="Default select example" disabled>
-                                <option disabled>SCD30 Mesurement interval</option>
-                                <option selected value="1">2 sec</option>
-                                <option value="2">5 sec</option>
-                                <option value="1">10 sec</option>
-                                <option value="2">30 sec</option>
-                                <option value="1">1 min</option>
-                                <option value="2">2 min</option>
+                                <select class="form-select form-select-sm" aria-label="Default select example" name="displayOrientation">
+                                <option selected disabled>Screen Orientation</option>
+                                <option value="0">1</option>
+                                <option value="1">2</option>
+                                <option value="2">3</option>
+                                <option value="3">4</option>
                               </select></td>
                             </tr>
                             <tr>
-                              <th scope="row">4</th>
-                              <td></td>
-                              <td><span id="tempUnit">-</span></td>
-                            </tr>
+                                <th scope="row">4</th>
+                                <td>LED</td>
+                                <td>
+                                  <select class="form-select form-select-sm" aria-label="Default select example" name="Led">
+                                  <option selected disabled>LED</option>
+                                  <option value="1">On</option>
+                                  <option value="0">Off</option>
+                                </select></td>
+                              </tr>
+                              <tr>
+                                <th scope="row">5</th>
+                                <td>Wlan SSID</td>
+                                <td>
+                                  <input class="form-input form-input-sm" aria-label="Default input example" id="ssid" name="ssid" minl/></td>
+                              </tr>
+                              <tr>
+                                <th scope="row">6</th>
+                                <td>Wlan Password</td>
+                                <td>
+                                  <input class="form-input form-input-sm" aria-label="Default input example" type="password" id="pass" name="password" minl/>
+                                </td>
+                              </tr>
+                              <tr>
+                                <th scope="row">7</th>
+                                <td>MQTT</td>
+                                <td>
+                                    <input class="form-control form-control-sm" type="text" placeholder=".form-control-sm" aria-label=".form-control-sm example">
+                                </td>
+                              </tr>
                             <tr>
-                              <th scope="row">5</th>
+                            <tr>
+                                <th scope="row">8</th>
+                                <td>MQTT</td>
+                                <td>
+                                    <input class="form-control form-control-sm" type="text" placeholder=".form-control-sm" aria-label=".form-control-sm example">
+                                </td>
+                                </tr>
+                                <tr>
+                                <th scope="row">9</th>
+                                <td>MQTT</td>
+                                <td>
+                                    <input class="form-control form-control-sm" type="text" placeholder=".form-control-sm" aria-label=".form-control-sm example">
+                                </td>
+                                </tr>
+                            <tr>
+                              <th scope="row">10</th>
                               <td></td>
                               <td><span id="h">-</span></td>
                             </tr>
                             <tr>
-                              <th scope="row">6</th>
-                              <td></td>
-                              <td><span id="h">-</span></td>
+                              <th scope="row">11</th>
+                              <td><a href="/restapi">Rest API</a> | <a href="/restapi">Connected (IP)</a></td>
+                              <td><span id="h">LCD OK | BME OK | SCD OK</span></td>
                             </tr>
                             <tr>
-                              <th scope="row">7</th>
-                              <td></td>
-                              <td><span id="h">-</span></td>
-                            </tr>
-                            <tr>
-                              <th scope="row"></th>
-                              <td></td>
-                              <td><span id="h">-</span></td>
-                            </tr>
-                            <tr>
-                              <th scope="row"></th>
-                              <td></td>
-                              <td><span id="h">-</span></td>
-                            </tr>
-                            <tr>
-                              <th scope="row"></th>
-                              <td></td>
-                              <td><span id="h">-</span></td>
-                            </tr>
-                            <tr>
-                              <th scope="row"></th>
-                              <td></td>
-                              <td><span id="h">-</span></td>
-                            </tr>
-                            <tr>
-                              <th scope="row"></th>
+                              <th scope="row">12</th>
                               <td><button type="submit" class="btn btn-sm btn-success">Save</button></form></td>
-                              <td><button onclick="fetch('/reset')" type="button" class="btn btn-sm btn-danger">Reset</button></td>
+                              <td><button onclick="fetch('/reset')" type="button" class="btn btn-sm btn-danger">Reboot</button>
+                                  <button onclick="fetch('/freset')" type="button" class="btn btn-sm btn-danger">Factory Reset</button></td>
                             </tr>
                           </tbody>
                         </table>

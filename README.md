@@ -50,36 +50,36 @@ IMPORTANT dont forget that the PMS7003 sensor needs 5v for the fan! The other co
 
 ## Librarys
 For the Arduino IDE you need to install the following librarys:
-#include  <esp_system.h>
-#include  <rom/ets_sys.h>
-#include  <ArduinoJson.h>
-#include  <FS.h>
-#include  <LittleFS.h>
-#include  <Wire.h>
-#include  <math.h>
-#include  <PMS.h>
-#include  <Adafruit_SCD30.h>
-#include  <Adafruit_BME680.h>
-#include  <Adafruit_GFX.h>
-#include  <Adafruit_SH110X.h>
-#include  <WiFi.h>
-#include  <WebServer.h>
-#include  <WebSocketsServer.h>
+- #include  <esp_system.h>
+- #include  <rom/ets_sys.h>
+- #include  <ArduinoJson.h>
+- #include  <FS.h>
+- #include  <LittleFS.h>
+- #include  <Wire.h>
+- #include  <math.h>
+- #include  <PMS.h>
+- #include  <Adafruit_SCD30.h>
+- #include  <Adafruit_BME680.h>
+- #include  <Adafruit_GFX.h>
+- #include  <Adafruit_SH110X.h>
+- #include  <WiFi.h>
+- #include  <WebServer.h>
+- #include  <WebSocketsServer.h>
 
 ## LittleFS
-This project uses the LittleFS filesystem. I have made it with the "arduino-littlefs-upload-1.5.2.vsix" you have to install it by using the guide from that project to your Arduino IDE and follow the steps to upload the files in the project folder.
+This project uses the LittleFS filesystem. I have made it with the "arduino-littlefs-upload-1.5.2.vsix" (https://github.com/earlephilhower/arduino-littlefs-upload) you have to install it by using the guide from that project to your Arduino IDE and follow the steps to upload the files in the project folder.
 
 ## Install
-Download the project folder (you need the whole folder). Run the Arduino IDE open the Main file (acutally: SENSORV3.7.ino) close the Serial Monitor and Press Strg+Shift+P and type in "Upload to littleFS to Pico/Esp8266/Esp32". And run this. This will upload the files in the data folder (for example the index.html). If you uploaded the files you can compile and upload the Main file by clicking the compile and upload botton (arrow to the right). That will take a few minutes.
+Download the whole project folder (you need the whole folder). Run the Arduino IDE open the Main file (acutally: SENSORV3.9.ino) close the Serial Monitor and Press Strg+Shift+P and type in "Upload to littleFS to Pico/Esp8266/Esp32". And run this. This will upload the files from the data folder (for example the index.html). If you have uploaded the files you can compile and upload the Main file by clicking the compile and upload botton (arrow to the right). That will take a few minutes.
 
 ## Run it!
-If you have compiled and uploaded the code and you have uploaded the additional files it should work. First the ESP32 will boot up and show you: "AirSense" on the screen. After a few seconds the screen changes. It should show the measurements. But this need a few seconds. CO2 measurement needs about 30 seconds. You will notice that your Display turns of after a few seconds (default 10sec). So you have to touch the "Touchpin" to activate the display (my idea is to make a little steelplate as touch sensor to the pin). Maybe you can adjust the Displaytimeout in the webinterface later(not implemented yet).
+If you have compiled and uploaded the code and you have uploaded the additional files it should work. Maybe you have to press the reset botton or restart the esp32 manually. First the ESP32 will boot up and show you: "AirSense" on the splash screen. After a few seconds the screen changes. It should show the measurements. But this need a few seconds. CO2 measurement needs about 30 seconds. You will notice that your Display turns of after a few seconds (default 10sec). So you have to touch the "Touchpin" to activate the display (my idea is to make a little steelplate as touch sensor to the pin).
 
-## Webinterface
-You can connect your mobile device. Take you Smartphone or any other device and search for a new  Wifi named "AirSense". Connect directly to them and put in the Password "12345678". Now open a Browser and type in the IP adress that should be actually that should be "192.168.4.1". Now you should see the Live data from your AirSense. Go to the left side to do some settings like change °C to °F. Or other things (not implemented now)
+## Webinterface (Login)
+You can connect your mobile device. Take you Smartphone or any other device and search for a new  Wifi named "AirSense". Connect directly to them and put in the Password "12345678". Now open a Browser and type in the IP adress that should be actually be "192.168.4.1". If you start the ESP32 you see the IP in the first row. This function is called the AcessPoint mode (AP Mode). Now you should see the Live data from your AirSense. Go to the left side to do some settings like change °C to °F. Or other things (not implemented now). A regular WIFI mode (connecting to your WIFI Router) will be implemented soon. That is called Stationary Mode (STA Mode).
 
 ## 3D Printed Case
-The 3D Printed case is even still Work in progress.
+The 3D Printed case is still Work in progress.
 
 ## Thanks
 Thank you so much to David J. Malan, Doug Loyd, Brenda Anderson, Glenn Holloway, Rongxin Liu and of course to the whole CS50 Team. Thank you for making this education free available to the World.

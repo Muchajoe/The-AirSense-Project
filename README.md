@@ -45,7 +45,7 @@ how to wire the components to the ESP32. The BME680 Sensor, the OLED Screen and 
 |5               	|Sensor SCL (BME680 and SCD30)|
 | 				|			   |
 
-IMPORTANT dont forget that the PMS7003 sensor needs 5v for the fan! The other components can be powered with the onboard 3.3V pins. The Sensors SDA and SDL should be wired to both sensors BME680 and SCD30 (paralel). The power consumption is estimated about 750mA so i would recommend a at least 1A USB Plug.
+IMPORTANT dont forget that the PMS7003 sensor needs 5v for the fan! And the ESP cant serve that 5V to the 5v Pin via powering from the USB. So you need to power the ESP32 with a 5V source, that you can take the 5v from that source too for the PMS7003 sensor. The other components can be powered with the onboard 3.3V pins. The Sensors SDA and SDL should be wired to both sensors BME680 and SCD30 (paralel). The power consumption is estimated about 750mA so i would recommend a at least 1A USB Plug.
 
 
 ## Librarys

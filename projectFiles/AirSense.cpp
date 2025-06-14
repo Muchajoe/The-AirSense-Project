@@ -28,6 +28,7 @@
 #include <WiFi.h>
 #include <WebServer.h>
 #include <WebSocketsServer.h>
+#include <PubSubClient.h>
 
 hw_timer_t *timer = NULL;     // Watchdog
 
@@ -37,10 +38,17 @@ String apPassword = "12345678";
 String apIP = "000.000.000.000";
 String staSSID;
 String staPassword;
-String staIP = "000.000.000.000";
+String staIP = "0.0.0.0";
+String adress;
+
 String MQTTname;
 String MQTTtopic;
+String mqtt_server;
+String mqtt_user;
+String mqtt_password;
+int mqtt_port = 1883;
 
+String discovery_message;
 String measurementsJsonData;
 String configJsonData;
 
@@ -49,8 +57,8 @@ String configJsonData;
 //const char* config = "/config.json";
 //const int PMS_RX =
 //const int PMS_TX =
-const int SCD_SDA = 4;        // SDA-Pin für SCD30 WEIß
-const int SCD_SCL = 5;        // SCL-Pin für SCD30
+const int SCD_SDA = 4;        // SDA-Pin für SCD30/BME Wei0
+const int SCD_SCL = 5;        // SCL-Pin für SCD30/BME
 const int OLED_SDA = 47;      // SDA-Pin für display
 const int OLED_SCL = 21;      // SCL-Pin für display
 const int SCREEN_WIDTH = 128; // OLED display width, in pixels
@@ -59,18 +67,20 @@ const int OLED_RESET = -1;    // can set an oled reset pin if desired
 const int TOUCH_PIN = 1;      // Set Touchpin
 const int wdtTimeout = 6000;  // Watchdog time in ms to trigger the watchdog
 
-const int numSensors = 8;  // number of sending mesaurements  ----------------------------------------------------------------
-const int arraySize = 49;  // number of mesaurements          ----------------------------------------------------------------
-float sensorValues[numSensors][arraySize] = {0};
-const char* mesaurementNames[numSensors] = {"Temperatur", "Luftfeuchtigkeit", "Druck", "Licht", "CO2", "Lautstärke", "Vibration", "Spannung"};
+//const int numSensors = 8;     // number of sending mesaurements  ----------------------------------------------------------------
+//const int arraySize = 49;     // number of mesaurements          ----------------------------------------------------------------
+//float sensorValues[numSensors][arraySize] = {0};
+//const char* mesaurementNames[numSensors] = {"Temperatur", "Luftfeuchtigkeit", "Druck", "Licht", "CO2", "Lautstärke", "Vibration", "Spannung"};
 
-const double a = 17.62;   // Temperaturkoeffizient
-const double b = 243.12;  // Skalenkonstante
-const double Rv = 461.5;  // spezifische Gaskonstante für Wasserdampf in J/(kg*K)
+const double a = 17.62;   // temperature coefficient
+const double b = 243.12;  // scale constant
+const double Rv = 461.5;  // specific gas constant for water vapor in J/(kg*K)
 double alpha = 0;         // steampressure-Logarythm-coeffizient SCD
 double alphaBme = 0;      // steampressure-Logarythm-coeffizient BME
 double dewPoint = 0;      // dewpoint calculated from SCD Mesaruements
 double dewPointBme = 0;   // dewpoint calculated from BME Mesaruements
+double dewPointF = 0;      // dewpoint calculated from SCD Mesaruements
+double dewPointBmeF = 0;   // dewpoint calculated from BME Mesaruements
 
 float temp = 0;         // sensor value
 float tempf = 0;        // sensor value
@@ -86,7 +96,7 @@ float version = 0.4;    // version number
 int pm10 = 0;                       // sensor value
 int pm25 = 0;                       // sensor value
 int pm100 = 0;                      // sensor value
-int resetDelay = 10000;             // über Webinterface anpassbar dispaly timeout USER
+int resetDelay = 10000;             // Display timeout Time in ms
 int calibrationInterval = 3600000;  // Touchcalibrationintervall in ms (3600000 = 3 Stunden)
 int printInterval = 5000;
 int mInterval = 10;                 // Sensor interval PMS SCD30 in sec
@@ -94,8 +104,8 @@ int BmeInterval = 10000;            // Sensor Interval BME 680
 int contrast = 1;                   // Display brightness USER
 int touchSense = 100;               // set the touch sensitivity. Less is more sensitiv
 int touchTreshhold = 500000;        // Treshhold Touchpin (autocalibrate)
-int co2Limit = 1500;                // Co2 Limit zum anzeigen eines "!" beim überschreiten USER
-int wsLiveInterval = 1000;          // every seconds send JSON via Websocket
+int co2Limit = 1500;                // Co2 Limit for display a !
+int wsLiveInterval = 2000;          // every seconds send JSON via Websocket
 int PMSInterval = 90000;            // the interval of PMS Sleep
 int chartInterval = 100000;         // the interval for sending new data to the webchart (1800000 ms = 30 min)
 int uptime = 0;                     // uptime in min
@@ -120,6 +130,7 @@ bool statusDisplay = false;
 bool displayTempSource = false;  // false = SCD -- true = BME
 
 bool LedSwitch = true;
+bool network = false;
 
 Adafruit_SH1107 display = Adafruit_SH1107(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire1, OLED_RESET, 1000000, 100000);
 Adafruit_SCD30 scd30;
@@ -127,6 +138,9 @@ Adafruit_BME680 bme;
 
 PMS pms(Serial2);
 PMS::DATA data;
+
+WiFiClient espClient;
+PubSubClient client(espClient);
 
 WebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
@@ -164,22 +178,21 @@ void setup() {    // ------------------------------------------ SETUP STARTS HER
   Serial.begin(115200);                            // Start serial monitor for USB communication to the pc
   Serial2.begin(9600);                             // Start serial connection to the PMS7003 sensor
 
-  WiFi.softAP(apSSID, apPassword);
-  IPAddress apIP1 = WiFi.softAPIP();
-  apIP = apIP1.toString();
-  Serial.print("IP-adress: ");
-  Serial.println(apIP);
-
-
-
    // start LittleFS
   if (!LittleFS.begin()) {
     Serial.println("Fehler beim Starten von LittleFS");
     return;
   }
 
-  webRoutes();
   loadConfig();
+  webRoutes();
+
+  WiFi.softAP(apSSID, apPassword);
+  IPAddress apIP1 = WiFi.softAPIP();
+  apIP = apIP1.toString();
+  Serial.print("APIP-adress: ");
+  Serial.println(apIP);
+  //wlanConnect();                                   // try to connect to the wlan router
 
   // Webserver starten
   server.begin();
@@ -238,8 +251,8 @@ void setup() {    // ------------------------------------------ SETUP STARTS HER
   display.setCursor(0,0);
   display.print(F("AP: "));
   display.println(apIP);
-  display.print(F("STA: "));
-  display.print(staIP);
+  //display.print(F("STA: "));
+  //display.print(staIP);
 
   
   display.setCursor(0,120);
@@ -267,19 +280,20 @@ void loop() {     // ------------------------------------------ MAIN LOOP STARTS
       }
 
     temp = scd30.temperature;
-    tempf = scd30.temperature * 1.8 + 32;
+    tempf = temp * 1.8 + 32;
     hum = scd30.relative_humidity;
     co2 = scd30.CO2;
 
     alpha = (a * temp) / (b + temp) + log(hum / 100.0);
     dewPoint = (b * alpha) / (a - alpha);
+    dewPointF = dewPoint * 1.8 + 32;
     }
 
     if (bme.beginReading() && currentMillis - lastBmeInterval > BmeInterval) { // Read the BME 680 mesaurements
         if (!bme.endReading()) {
           Serial.println("Failed to read BME680-Data!");
           return;
-    }
+          }
 
     bmeTemp = bme.readTemperature();
     bmeTempf = bme.readTemperature() * 1.8 + 32;
@@ -288,12 +302,13 @@ void loop() {     // ------------------------------------------ MAIN LOOP STARTS
     bmeVoc = bme.gas_resistance / 1000.0; // VOC Resistance in KOHM
     alphaBme = (a * bmeTemp) / (b + bmeTemp) + log(bmeHum / 100.0);
     dewPointBme = (b * alphaBme) / (a - alphaBme);
+    dewPointBmeF = dewPointBme * 1.8 + 32;
     lastBmeInterval = currentMillis;
   }
 
-  if (currentMillis - lastPMSread > PMSInterval) { // Touch pin recalibration
+  if (currentMillis - lastPMSread > PMSInterval) { // PMS Wakeup
       pms.wakeUp();
-      if (currentMillis - lastPMSread > PMSInterval + 30000){
+      if (currentMillis - lastPMSread > PMSInterval + 30000){ // PMS wait for warmup for the mesaurements
       pms.requestRead();
         if (pms.readUntil(data)){                 // Read the PMS7003 mesaurements
         pm10 = data.PM_AE_UG_1_0;
@@ -328,17 +343,38 @@ void loop() {     // ------------------------------------------ MAIN LOOP STARTS
     }
 
   if (currentMillis - lastWsLiveSend > wsLiveInterval) { // Send live data every interval
+      staIP = WiFi.localIP().toString();
       LiveDataToJson();
       webSocket.broadcastTXT(measurementsJsonData);
       lastWsLiveSend = currentMillis;
+      Serial.println("WS Send");
+
+
+      // Connection chek in the same interval:
+      if (!staSSID.isEmpty() && !staPassword.isEmpty() && WiFi.status() != WL_CONNECTED) {
+      //WiFi.disconnect();
+      WiFi.begin(staSSID, staPassword);
+      }
+
+      if (!mqtt_server.isEmpty() && !mqtt_user.isEmpty() && !mqtt_password.isEmpty() && !client.connected() && WiFi.status() == WL_CONNECTED) {
+      client.setServer(mqtt_server.c_str(), mqtt_port);
+      client.connect("AirSense", mqtt_user.c_str(), mqtt_password.c_str());
+      client.publish("test/topic", measurementsJsonData.c_str()); // MQTT Discovery message send
+      }
+
+      if (client.connected()) { // need a longer interval time
+      client.publish("test/topic", measurementsJsonData.c_str());
+      }
+
+
     }
 
-  if (currentMillis - lastChartInerval > chartInterval) { // Touch pin recalibration
-      webSocketSendChart();
-      lastChartInerval = currentMillis;
-    }
+  //if (currentMillis - lastChartInerval > chartInterval) { // Touch pin recalibration
+  //    webSocketSendChart();
+  //    lastChartInerval = currentMillis;
+  //  }
 
-
+  client.loop();
   webSocket.loop();
   server.handleClient();
 }
@@ -419,6 +455,15 @@ void webRoutes() {
       String userInput = server.arg("tempUnit");
       tempUnit = char(userInput[0]);
     }
+    if (server.hasArg("ssid") && server.hasArg("password")) {
+      staSSID = server.arg("ssid");
+      staPassword = server.arg("password");
+      //wlanConnect(); // that logic should be in the mainloop
+    }
+      if (server.hasArg("name")) {
+      name = server.arg("name");
+      name = apSSID + " " + name;
+    }
     if (server.hasArg("displayTimeout")) {
     String userInput2 = server.arg("displayTimeout");
     //Serial.print(userInput2);
@@ -460,7 +505,7 @@ void webSocketSendChart() {
 }
 
 void LiveDataToJson() {
-        StaticJsonDocument<800> jsonDocData;
+        StaticJsonDocument<1000> jsonDocData;
         jsonDocData["temperatureScd"] = String(temp, 2).toFloat();
         jsonDocData["temperatureScdF"] = String(tempf, 2).toFloat();
         jsonDocData["temperatureBme"] = String(bmeTemp, 2).toFloat();
@@ -469,6 +514,8 @@ void LiveDataToJson() {
         jsonDocData["humidityBme"] = String(bmeHum, 2).toFloat();
         jsonDocData["dewpointScd"] = String(dewPoint, 2).toFloat();
         jsonDocData["dewpointBme"] = String(dewPointBme, 2).toFloat();
+        jsonDocData["dewpointScdF"] = String(dewPointF, 2).toFloat();
+        jsonDocData["dewpointBmeF"] = String(dewPointBmeF, 2).toFloat();
         jsonDocData["bmePress"] = String(bmePress, 2).toFloat();
         jsonDocData["bmeVoc"] = String(bmeVoc, 2).toFloat();
         jsonDocData["co2"] = String(co2, 2).toFloat();
@@ -479,6 +526,7 @@ void LiveDataToJson() {
         jsonDocData["tempUnit"] = tempUnit;
         jsonDocData["name"] = name;
         jsonDocData["WlanIP"] = String(staIP);
+        jsonDocData["network"] = bool(network);
         jsonDocData["Version"] = String(version);
         //jsonDoc["mesaurementNames"] = mesaurementNames[1];
 
@@ -496,6 +544,8 @@ void configToJson() {
         jsonDocConfig["Name"] = name;
         jsonDocConfig["WifiSSID"] = staSSID;
         jsonDocConfig["WifiPW"] = staPassword;
+        jsonDocConfig["staIP"] = String(staIP);
+        jsonDocConfig["network"] = bool(network);
         jsonDocConfig["MQTTtopic"] = MQTTtopic;
         jsonDocConfig["MQTTName"] = MQTTname;
         jsonDocConfig["ScreenOrientation"] = screenRoataion;
@@ -514,13 +564,13 @@ void configToJson() {
 
 void loadConfig() {
   if (!LittleFS.exists("/config.json")) {
-    Serial.println("settings.json existiert nicht");
+    Serial.println("settings.json does not exist");
     return;
   }
 
   File file = LittleFS.open("/config.json", "r");
   if (!file) {
-    Serial.println("Konnte settings.json nicht zum Lesen öffnen");
+    Serial.println("reading error settings.json");
     return;
   }
 
@@ -529,14 +579,16 @@ void loadConfig() {
   file.close();
 
   if (error) {
-    Serial.println("Fehler beim Parsen von settings.json");
+    Serial.println("parsing error settings.json");
     return;
   }
 
-  // Variablen aktualisieren
+  // Variablen laden
   name = (const char*) jsonDocConfig["Name"];
   staSSID = (const char*) jsonDocConfig["WifiSSID"];
   staPassword = (const char*) jsonDocConfig["WifiPW"];
+  staIP = (const char*) jsonDocConfig["staIP"];
+  network = (bool) jsonDocConfig["network"];
   MQTTtopic = (const char*) jsonDocConfig["MQTTtopic"];
   MQTTname = (const char*) jsonDocConfig["MQTTname"];
   screenRoataion = (int) jsonDocConfig["ScreenOrientation"];
@@ -685,7 +737,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
     case WStype_TEXT:
       {
         Serial.printf("message from client: %s\n", payload);
-        // Hier kannst du auf Nachrichten vom Client reagieren
+        // resct here from client side requests
       }
       break;
   }

@@ -30,6 +30,10 @@
           left: 50%;
           transform: translate(-50%);
           }
+          .small{
+          color:black;
+          font-size: 0.75vh;
+          }
           #header{
           color:black;
           font-size: 4vh;
@@ -123,22 +127,22 @@
                               </tr>
                               <tr>
                                 <th scope="row">5</th>
-                                <td>Wlan SSID</td>
+                                <td>Wlan</td>
                                 <td>
-                                  <input class="form-input form-input-sm" aria-label="Default input example" id="ssid" name="ssid" minl/></td>
+                                  <input class="form-input form-input-sm" aria-label="Default input example" id="ssid" placeholder="SSID" name="ssid" minl/></td>
                               </tr>
                               <tr>
                                 <th scope="row">6</th>
-                                <td>Wlan Password</td>
+                                <td>Wlan</td>
                                 <td>
-                                  <input class="form-input form-input-sm" aria-label="Default input example" type="password" id="pass" name="password" minl/>
+                                  <input class="form-input form-input-sm" aria-label="Default input example" type="password" id="pass" placeholder="Password" name="password" minl/>
                                 </td>
                               </tr>
                               <tr>
                                 <th scope="row">7</th>
                                 <td>MQTT</td>
                                 <td>
-                                    <input class="form-control form-control-sm" type="text" placeholder=".form-control-sm" aria-label=".form-control-sm example">
+                                    <input class="form-control form-control-sm" type="text" placeholder="Server" aria-label=".form-control-sm example">
                                 </td>
                               </tr>
                             <tr>
@@ -146,14 +150,14 @@
                                 <th scope="row">8</th>
                                 <td>MQTT</td>
                                 <td>
-                                    <input class="form-control form-control-sm" type="text" placeholder=".form-control-sm" aria-label=".form-control-sm example">
+                                    <input class="form-control form-control-sm" type="text" placeholder="Password" aria-label=".form-control-sm example">
                                 </td>
                                 </tr>
                                 <tr>
                                 <th scope="row">9</th>
                                 <td>MQTT</td>
                                 <td>
-                                    <input class="form-control form-control-sm" type="text" placeholder=".form-control-sm" aria-label=".form-control-sm example">
+                                    <input class="form-control form-control-sm" type="text" placeholder="Topic" aria-label=".form-control-sm example">
                                 </td>
                                 </tr>
                             <tr>
@@ -163,8 +167,8 @@
                             </tr>
                             <tr>
                               <th scope="row">11</th>
-                              <td><a href="/restapi">Rest API</a> | <a href="/restapi">Connected (IP)</a></td>
-                              <td><span id="h">LCD OK | BME OK | SCD OK</span></td>
+                              <td><a class="unit" href="/restapi">Rest API</a> | <a class="unit" id="statusLink" href="/">IP</a></td>
+                              <td><span class="unit">LCD OK | BME OK | SCD OK</span></td>
                             </tr>
                             <tr>
                               <th scope="row">12</th>
@@ -205,42 +209,52 @@
                                 <td>Humidity (BME680)</td>
                                 <td><span id="humidityBme">-</span><span class="unit">%rel</span></td>
                               </tr>
-                              <tr>
+                               <tr>
                                 <th scope="row">5</th>
+                                <td>Dewpoint (SCD30)</td>
+                                <td><span id="dewpointScd">-</span><span class="unit">&deg;</span><span class="unit" id="tempUnitScd"></span></td>
+                              </tr>
+                              <tr>
+                                <th scope="row">6</th>
+                                <td>Dewpoint (BME680)</td>
+                                <td><span id="dewpointBme">-</span><span class="unit">&deg;</span><span class="unit" id="tempUnitBme"></span></td>
+                              </tr>
+                              <tr>
+                                <th scope="row">7</th>
                                 <td>CO2</td>
                                 <td><span id="co2">-</span><span class="unit"> ppm</span></td>
                               </tr>
                               <tr>
-                                <th scope="row">6</th>
+                                <th scope="row">8</th>
                                 <td>Pressure</td>
                                 <td><span id="pressure">-</span><span class="unit"> hPa</span></td>
                               </tr>
                               <tr>
-                                <th scope="row">7</th>
+                                <th scope="row">9</th>
                                 <td>VOC</td>
                                 <td><span id="voc">-</span><span class="unit"> ohm</span></td>
                               </tr>
                               <tr>
-                                <th scope="row">8</th>
+                                <th scope="row">10</th>
                                 <td>PM1.0</td>
                                 <td><span id="pm10">-</span><span class="unit">&#181;g/m&#179;</span></td>
                               </tr>
                               <tr>
-                                <th scope="row">9</th>
+                                <th scope="row">11</th>
                                 <td>PM2.5</td>
                                 <td><span id="pm25">-</span><span class="unit">&#181;g/m&#179;</span></td>
                               </tr>
                               <tr>
-                                <th scope="row">10</th>
+                                <th scope="row">12</th>
                                 <td>PM10</td>
                                 <td><span id="pm100">-</span><span class="unit">&#181;g/m&#179;</span></td>
                               </tr>
                               <tr>
-                                <th scope="row">11</th>
+                                <th scope="row">13</th>
                                 <td>Status</td>
                                 <td><span id="connection" class="unit">-</span></td>
                                 <tr>
-                                  <th scope="row">12</th>
+                                  <th scope="row">14</th>
                                   <td>Uptime</td>
                                   <td><span id="uptime">-</span><span class="unit"> min</span></td>
                                 </tr>
@@ -316,14 +330,21 @@
             document.getElementById('tempUnitScd').innerText = String.fromCharCode(data.tempUnit);
             document.getElementById('tempUnitBme').innerText = String.fromCharCode(data.tempUnit);
 
+	    //document.getElementById('statusLink').textContent = data.WlanIP;
+	    //document.getElementById('statusLink').href = "http://" + data.WlanIP;
+
             if (String.fromCharCode(data.tempUnit) == 'C') {
             document.getElementById('temperatureScd').innerText = data.temperatureScd;
             document.getElementById('temperatureBme').innerText = data.temperatureBme;
+            document.getElementById('dewpointScd').innerText = data.dewpointScd;
+            document.getElementById('dewpointBme').innerText = data.dewpointBme;
             }
 
             if (String.fromCharCode(data.tempUnit) == 'F') {
             document.getElementById('temperatureScd').innerText = data.temperatureScdF;
             document.getElementById('temperatureBme').innerText = data.temperatureBmeF;
+            document.getElementById('dewpointScd').innerText = data.dewpointScdF;
+            document.getElementById('dewpointBme').innerText = data.dewpointBmeF;
             }
 
         };

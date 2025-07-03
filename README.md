@@ -1,4 +1,6 @@
 # The AirSense Project
+(https://github.com/Muchajoe/The-AirSense-Project/blob/main/Images/Logo3.png?raw=true)
+
 Aaalright! This is my Final project for Harvards CS50. It is a "low budget" airquality sensor with (i think) high quality components. I use the Arduino IDE for programming. That means the main programm runs in C++. In my opinion that is very smiliar to the courses C programming language. With around 70$ (but i think if you do a bit research you can do it cheaper) you will get the following measurements.
 - Temperatur (scd30)
 - Temperatur (BME680)
